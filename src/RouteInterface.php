@@ -15,5 +15,5 @@ interface RouteInterface
 
     public function getPattern(): string;
     public function getName(): string;
-    public function getHandler(): RequestHandlerInterface;
+    public function getHandler(): RequestHandlerInterface|callable|string;
 }

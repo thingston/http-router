@@ -9,16 +9,21 @@ use Psr\Http\Server\RequestHandlerInterface;
 class Route implements RouteInterface
 {
     /**
+     * @var RequestHandlerInterface|callable|string
+     */
+    private $handler;
+
+    /**
      * @param array<string> $methods
      * @param string $pattern
      * @param string $name
-     * @param RequestHandlerInterface $handler
+     * @param RequestHandlerInterface|callable|string $handler
      */
     public function __construct(
         private array $methods,
         private string $pattern,
         private string $name,
-        private RequestHandlerInterface $handler
+        RequestHandlerInterface|callable|string $handler
     ) {
         $this->methods = $methods;
         $this->pattern = $pattern;
@@ -44,7 +49,7 @@ class Route implements RouteInterface
         return $this->name;
     }
 
-    public function getHandler(): RequestHandlerInterface
+    public function getHandler(): RequestHandlerInterface|callable|string
     {
         return $this->handler;
     }
