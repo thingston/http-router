@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Thingston\Http\Router;
 
-use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 interface RouterInterface
 {
