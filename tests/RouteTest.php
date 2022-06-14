@@ -52,4 +52,15 @@ final class RouteTest extends TestCase
     {
         return $this->getMockBuilder(ResponseInterface::class)->getMock();
     }
+
+    public function testRouteParameters(): void
+    {
+        $route = new Route(['GET'], '/hello/{name}/in/{location}/{date}', 'home', 'handler');
+
+        $this->assertSame([
+            'name' => null,
+            'location' => null,
+            'date' => null,
+        ], $route->getParameters());
+    }
 }
