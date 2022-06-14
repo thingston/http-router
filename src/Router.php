@@ -125,9 +125,17 @@ class Router implements RouterInterface
             case Dispatcher::FOUND:
                 break;
             case Dispatcher::NOT_FOUND:
-                throw new NotFoundException('Not found.');
+                throw new NotFoundException(sprintf(
+                    'Resource for URL "%s" not found.',
+                    (string) $request->getUri()
+                ));
             case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new MethodNotAllowedException('Method not allowed.');
+                throw new MethodNotAllowedException(sprintf(
+                    'Method "%s" is not allowed for URL "%s"; please use "%s" instead.',
+                    $request->getMethod(),
+                    (string) $request->getUri(),
+                    implode('", "', $result[1])
+                ));
         }
 
         return $this->routes->get($result[1]);
