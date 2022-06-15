@@ -21,4 +21,10 @@ interface RouteInterface
      * @return array<string, string|null>
      */
     public function getParameters(): array;
+
+    /**
+     * @param array<string, string|null> $parameters
+     * @return self
+     */
+    public function withParameters(array $parameters): self;
 }

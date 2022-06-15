@@ -138,6 +138,8 @@ class Router implements RouterInterface
                 ));
         }
 
-        return $this->routes->get($result[1]);
+        $route = $this->routes->get($result[1]);
+
+        return $route->withParameters($result[2]);
     }
 }

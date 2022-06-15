@@ -7,6 +7,7 @@ namespace Thingston\Tests\Http\Router;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Thingston\Http\Router\Exception\InvalidArgumentException;
 use Thingston\Http\Router\Route;
 
 final class RouteTest extends TestCase
@@ -62,5 +63,26 @@ final class RouteTest extends TestCase
             'location' => null,
             'date' => null,
         ], $route->getParameters());
+    }
+
+    public function testRouteWithParameters(): void
+    {
+        $parameters = [
+            'name' => 'foo',
+            'location' => 'bar',
+            'date' => 'baz',
+        ];
+
+        $route = (new Route(['GET'], '/hello/{name}/in/{location}/{date}', 'home', 'handler'))
+            ->withParameters($parameters);
+
+        $this->assertSame($parameters, $route->getParameters());
+    }
+
+    public function testRouteWithMissingsParameters(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        (new Route(['GET'], '/hello/{name}/in/{location}/{date}', 'home', 'handler'))
+            ->withParameters([]);
     }
 }

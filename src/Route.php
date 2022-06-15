@@ -6,6 +6,7 @@ namespace Thingston\Http\Router;
 
 use FastRoute\RouteParser\Std;
 use Psr\Http\Server\RequestHandlerInterface;
+use Thingston\Http\Router\Exception\InvalidArgumentException;
 
 class Route implements RouteInterface
 {
@@ -73,21 +74,49 @@ class Route implements RouteInterface
     }
 
     /**
+     * @param array<string, string>|null $candidates
      * @return array<string, string|null>
      */
-    private function parseParameters(): array
+    private function parseParameters(?array $candidates = null): array
     {
         $parameters = [];
 
-        /** @var array<string>|string $segment */
-        foreach ((new Std())->parse($this->pattern)[0] as $segment) {
-            if (is_string($segment)) {
-                continue;
+        /** @var array<array<array<string>|string>> $matches */
+        $matches = (new Std())->parse($this->pattern);
+
+        $optionals = false;
+
+        /** @var array<array<string>|string> $match */
+        foreach ($matches as $match) {
+            foreach ($match as $segment) {
+                if (is_string($segment)) {
+                    continue;
+                }
+
+                $name = $segment[0];
+
+                if (is_array($candidates) && false === $optionals && false === isset($candidates[$name])) {
+                    throw InvalidArgumentException::forMissingParameter($name);
+                }
+
+                $parameters[$name] = $candidates[$name] ?? null;
             }
 
-            $parameters[$segment[0]] = null;
+            $optionals = true;
         }
 
         return $parameters;
+    }
+
+    /**
+     * @param array<string, string> $parameters
+     * @return self
+     */
+    public function withParameters(array $parameters): self
+    {
+        $route = clone $this;
+        $route->parameters = $this->parseParameters($parameters);
+
+        return $route;
     }
 }

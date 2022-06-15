@@ -24,21 +24,50 @@ final class RouterTest extends TestCase
         $this->assertCount(3, $router->getRoutes());
     }
 
-    public function testMatchRoute(): void
+    /**
+     * @dataProvider matchRouteProvider
+     *
+     * @param string $pattern
+     * @param string $name
+     * @param string $path
+     * @param array<string, string> $parameters
+     */
+    public function testMatchRoute(string $pattern, string $name, string $path, array $parameters): void
     {
+        $handler = $name . 'Action';
+
         $router = new Router();
 
-        $router->addRoute(new Route(['GET'], '/', 'home', 'HomeAction'))
-            ->addRoute(new Route(['GET'], '/about', 'about', 'AboutAction'))
-            ->addRoute(new Route(['GET'], '/hello/{name}', 'hello', 'HelloAction'));
+        $router
+            ->addRoute(new Route(['GET'], '/pattern1', 'name1', 'handler1'))
+            ->addRoute(new Route(['GET'], '/pattern2', 'name2', 'handler2'))
+            ->addRoute(new Route(['GET'], $pattern, $name, $handler))
+            ->addRoute(new Route(['GET'], '/pattern3', 'name3', 'handler3'))
+            ;
 
-        $request = new ServerRequest('GET', 'http://example.org/about');
+        $request = new ServerRequest('GET', 'http://example.org' . $path);
         $route = $router->match($request);
 
         $this->assertSame(['GET'], $route->getMethods());
-        $this->assertSame('/about', $route->getPattern());
-        $this->assertSame('about', $route->getName());
-        $this->assertSame('AboutAction', $route->getHandler());
+        $this->assertSame($pattern, $route->getPattern());
+        $this->assertSame($name, $route->getName());
+        $this->assertSame($handler, $route->getHandler());
+        $this->assertSame($parameters, $route->getParameters());
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    public function matchRouteProvider(): array
+    {
+        return [
+            ['/', 'home', '/', []],
+            ['/about', 'about', '/about', []],
+            ['/hello/{name}', 'hello', '/hello/foo', ['name' => 'foo']],
+            ['/hello/{name}/{required}', 'hello', '/hello/foo/bar', ['name' => 'foo', 'required' => 'bar']],
+            ['/hello/{name}[/{optional}]', 'hello', '/hello/foo/bar', ['name' => 'foo', 'optional' => 'bar']],
+            ['/hello/{name}[/{optional}]', 'hello', '/hello/foo', ['name' => 'foo', 'optional' => null]],
+        ];
     }
 
     public function testNotFoundException(): void
