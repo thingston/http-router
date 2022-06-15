@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Thingston\Tests\Http\Router;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Thingston\Http\Router\Exception\InvalidArgumentException;
 use Thingston\Http\Router\RequestHandlerResolver;
 use Thingston\Http\Router\Route;
-use Thingston\Http\Router\Exception\InvalidArgumentException;
 
 final class RequestHandlerResolverTest extends TestCase
 {
@@ -47,7 +48,7 @@ final class RequestHandlerResolverTest extends TestCase
     {
         $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
 
-        $container = $this->createConfiguredMock(\Psr\Container\ContainerInterface::class, [
+        $container = $this->createConfiguredMock(ContainerInterface::class, [
             'has' => true,
             'get' => $handler,
         ]);
@@ -66,7 +67,7 @@ final class RequestHandlerResolverTest extends TestCase
             return $response;
         };
 
-        $container = $this->createConfiguredMock(\Psr\Container\ContainerInterface::class, [
+        $container = $this->createConfiguredMock(ContainerInterface::class, [
             'has' => true,
             'get' => $handler,
         ]);
@@ -86,7 +87,7 @@ final class RequestHandlerResolverTest extends TestCase
     {
         $handler = 'foo';
 
-        $container = $this->createConfiguredMock(\Psr\Container\ContainerInterface::class, [
+        $container = $this->createConfiguredMock(ContainerInterface::class, [
             'has' => true,
             'get' => $handler,
         ]);
@@ -123,7 +124,7 @@ final class RequestHandlerResolverTest extends TestCase
     {
         $handler = new TestClassMethod();
 
-        $container = $this->createConfiguredMock(\Psr\Container\ContainerInterface::class, [
+        $container = $this->createConfiguredMock(ContainerInterface::class, [
             'has' => true,
             'get' => $handler,
         ]);

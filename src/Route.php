@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Thingston\Http\Router;
 
 use FastRoute\RouteParser\Std;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Thingston\Http\Router\Exception\InvalidArgumentException;
 
@@ -25,17 +26,20 @@ class Route implements RouteInterface
      * @param string $pattern
      * @param string $name
      * @param RequestHandlerInterface|callable|string $handler
+     * @param array<MiddlewareInterface> $middlewares
      */
     public function __construct(
         private array $methods,
         private string $pattern,
         private string $name,
-        RequestHandlerInterface|callable|string $handler
+        RequestHandlerInterface|callable|string $handler,
+        private array $middlewares = []
     ) {
         $this->methods = $methods;
         $this->pattern = $pattern;
         $this->name = $name;
         $this->handler = $handler;
+        $this->middlewares = $middlewares;
     }
 
     /**
@@ -118,5 +122,20 @@ class Route implements RouteInterface
         $route->parameters = $this->parseParameters($parameters);
 
         return $route;
+    }
+
+    /**
+     * @return array<MiddlewareInterface>
+     */
+    public function getMiddlewares(): array
+    {
+        return $this->middlewares;
+    }
+
+    public function pipe(MiddlewareInterface $middleware): self
+    {
+        $this->middlewares[] = $middleware;
+
+        return $this;
     }
 }

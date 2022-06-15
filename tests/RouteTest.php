@@ -6,6 +6,7 @@ namespace Thingston\Tests\Http\Router;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Thingston\Http\Router\Exception\InvalidArgumentException;
 use Thingston\Http\Router\Route;
@@ -84,5 +85,15 @@ final class RouteTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         (new Route(['GET'], '/hello/{name}/in/{location}/{date}', 'home', 'handler'))
             ->withParameters([]);
+    }
+
+    public function testPipeMiddlewares(): void
+    {
+        $route = new Route(['GET'], '/', 'home', 'handler');
+        $route->pipe($this->getMockBuilder(MiddlewareInterface::class)->getMock())
+            ->pipe($this->getMockBuilder(MiddlewareInterface::class)->getMock())
+            ->pipe($this->getMockBuilder(MiddlewareInterface::class)->getMock());
+
+        $this->assertCount(3, $route->getMiddlewares());
     }
 }
