@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Thingston\Http\Router;
 
+use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 interface RouteInterface
@@ -27,4 +28,10 @@ interface RouteInterface
      * @return self
      */
     public function withParameters(array $parameters): self;
+
+    /**
+     * @return array<MiddlewareInterface>
+     */
+    public function getMiddlewares(): array;
+    public function pipe(MiddlewareInterface $middleware): self;
 }
