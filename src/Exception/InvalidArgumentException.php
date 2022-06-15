@@ -15,4 +15,9 @@ class InvalidArgumentException extends \InvalidArgumentException implements Rout
     {
         return new self(sprintf('Missing required parameter "%s".', $name));
     }
+
+    public static function forInvalidHandler(string $name): self
+    {
+        return new self(sprintf('Unable to resolve handler "%s".', $name));
+    }
 }
