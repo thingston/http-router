@@ -109,4 +109,10 @@ final class RouteTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         new Route([], '/', 'home', 'handler');
     }
+
+    public function testBadPatternArgument(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Route('GET', '/hello/{name}]', 'home', 'handler');
+    }
 }
