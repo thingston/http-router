@@ -12,6 +12,11 @@ use Thingston\Http\Router\Exception\InvalidArgumentException;
 class Route implements RouteInterface
 {
     /**
+     * @var array<string>
+     */
+    private array $methods;
+
+    /**
      * @var RequestHandlerInterface|callable|string
      */
     private $handler;
@@ -22,20 +27,24 @@ class Route implements RouteInterface
     private ?array $parameters = null;
 
     /**
-     * @param array<string> $methods
+     * @param array<string>|string $methods
      * @param string $pattern
      * @param string $name
      * @param RequestHandlerInterface|callable|string $handler
      * @param array<MiddlewareInterface> $middlewares
      */
     public function __construct(
-        private array $methods,
+        array|string $methods,
         private string $pattern,
         private string $name,
         RequestHandlerInterface|callable|string $handler,
         private array $middlewares = []
     ) {
-        $this->methods = $methods;
+        if (empty($methods)) {
+            throw InvalidArgumentException::forEmptyMethods();
+        }
+
+        $this->methods = is_array($methods) ? $methods : [$methods];
         $this->pattern = $pattern;
         $this->name = $name;
         $this->handler = $handler;
