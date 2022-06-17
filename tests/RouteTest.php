@@ -96,4 +96,23 @@ final class RouteTest extends TestCase
 
         $this->assertCount(3, $route->getMiddlewares());
     }
+
+    public function testArgumentMethodsCanBeString(): void
+    {
+        $route = new Route('GET', '/', 'home', 'handler');
+
+        $this->assertSame(['GET'], $route->getMethods());
+    }
+
+    public function testArgumentMethodsCantBeEmpty(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Route([], '/', 'home', 'handler');
+    }
+
+    public function testBadPatternArgument(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new Route('GET', '/hello/{name}]', 'home', 'handler');
+    }
 }

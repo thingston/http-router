@@ -8,38 +8,50 @@ use FastRoute\RouteParser\Std;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Thingston\Http\Router\Exception\InvalidArgumentException;
+use Throwable;
 
 class Route implements RouteInterface
 {
+    /**
+     * @var array<string>
+     */
+    private array $methods;
+
     /**
      * @var RequestHandlerInterface|callable|string
      */
     private $handler;
 
     /**
-     * @var array<string, string|null>|null
+     * @var array<string, string|null>
      */
-    private ?array $parameters = null;
+    private array $parameters;
 
     /**
-     * @param array<string> $methods
+     * @param array<string>|string $methods
      * @param string $pattern
      * @param string $name
      * @param RequestHandlerInterface|callable|string $handler
      * @param array<MiddlewareInterface> $middlewares
      */
     public function __construct(
-        private array $methods,
+        array|string $methods,
         private string $pattern,
         private string $name,
         RequestHandlerInterface|callable|string $handler,
         private array $middlewares = []
     ) {
-        $this->methods = $methods;
+        if (empty($methods)) {
+            throw InvalidArgumentException::forEmptyMethods();
+        }
+
+        $this->methods = is_array($methods) ? $methods : [$methods];
         $this->pattern = $pattern;
         $this->name = $name;
         $this->handler = $handler;
         $this->middlewares = $middlewares;
+
+        $this->parameters = $this->parseParameters();
     }
 
     /**
@@ -70,10 +82,6 @@ class Route implements RouteInterface
      */
     public function getParameters(): array
     {
-        if (null === $this->parameters) {
-            $this->parameters = $this->parseParameters();
-        }
-
         return $this->parameters;
     }
 
@@ -85,8 +93,12 @@ class Route implements RouteInterface
     {
         $parameters = [];
 
-        /** @var array<array<array<string>|string>> $matches */
-        $matches = (new Std())->parse($this->pattern);
+        try {
+            /** @var array<array<array<string>|string>> $matches */
+            $matches = (new Std())->parse($this->pattern);
+        } catch (Throwable $e) {
+            throw new InvalidArgumentException($e->getMessage(), $e->getCode(), $e);
+        }
 
         $optionals = false;
 
