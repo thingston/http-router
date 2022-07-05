@@ -115,4 +115,36 @@ final class RouteTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         new Route('GET', '/hello/{name}]', 'home', 'handler');
     }
+
+    /**
+     * @dataProvider getUrlProvider
+     * @param string $url
+     * @param string $pattern
+     * @param array<string, string> $parameters
+     * @param array<string, string> $query
+     * @param string $hostname
+     * @return void
+     */
+    public function testGetUrl(string $url, string $pattern, array $parameters, array $query, string $hostname): void
+    {
+        $route = new Route('GET', $pattern, 'home', 'handler');
+
+        $this->assertSame($url, $route->getUrl($parameters, $query, $hostname));
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    public function getUrlProvider(): array
+    {
+        return [
+            ['/', '/', [], [], ''],
+            ['/?foo=bar', '/', [], ['foo' => 'bar'], ''],
+            ['/hello/pedro', '/hello/{name}', ['name' => 'pedro'], [], ''],
+            ['/hello/pedro', '/hello/{name}[/in/{place}]', ['name' => 'pedro'], [], ''],
+            ['/hello/pedro/in/lisbon', '/hello/{name}[/in/{place}]', ['name' => 'pedro', 'place' => 'lisbon'], [], ''],
+            ['http://example.org/', '/', [], [], 'http://example.org'],
+            ['http://example.org/?foo=bar', '/', [], ['foo' => 'bar'], 'http://example.org'],
+        ];
+    }
 }

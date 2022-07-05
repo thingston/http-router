@@ -30,6 +30,14 @@ interface RouteInterface
     public function withParameters(array $parameters): self;
 
     /**
+     * @param array<string, string> $parameters
+     * @param array<string, string> $query
+     * @param string $hostname
+     * @return string
+     */
+    public function getUrl(array $parameters = [], array $query = [], string $hostname = ''): string;
+
+    /**
      * @return array<MiddlewareInterface>
      */
     public function getMiddlewares(): array;

@@ -10,7 +10,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Thingston\Http\Router\Exception\InvalidArgumentException;
 use Throwable;
 
-class Route implements RouteInterface
+final class Route implements RouteInterface
 {
     /**
      * @var array<string>
@@ -26,6 +26,11 @@ class Route implements RouteInterface
      * @var array<string, string|null>
      */
     private array $parameters;
+
+    /**
+     * @var string
+     */
+    private string $url = '';
 
     /**
      * @param array<string>|string $methods
@@ -104,8 +109,12 @@ class Route implements RouteInterface
 
         /** @var array<array<string>|string> $match */
         foreach ($matches as $match) {
+            $isUrl = true;
+            $url = '';
+
             foreach ($match as $segment) {
                 if (is_string($segment)) {
+                    $url .= $segment;
                     continue;
                 }
 
@@ -116,6 +125,16 @@ class Route implements RouteInterface
                 }
 
                 $parameters[$name] = $candidates[$name] ?? null;
+
+                if (null === $parameters[$name]) {
+                    $isUrl = false;
+                } else {
+                    $url .= $parameters[$name];
+                }
+            }
+
+            if ($isUrl) {
+                $this->url = $url;
             }
 
             $optionals = true;
@@ -149,5 +168,23 @@ class Route implements RouteInterface
         $this->middlewares[] = $middleware;
 
         return $this;
+    }
+
+    /**
+     * @param array<string, string> $parameters
+     * @param array<string, string> $query
+     * @param string $hostname
+     * @return string
+     */
+    public function getUrl(array $parameters = [], array $query = [], string $hostname = ''): string
+    {
+        $this->parseParameters($parameters);
+        $url = $hostname . $this->url;
+
+        if (false === empty($query)) {
+            $url .= '?' . http_build_query($query);
+        }
+
+        return $url;
     }
 }
